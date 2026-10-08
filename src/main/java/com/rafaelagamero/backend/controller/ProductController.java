@@ -43,6 +43,7 @@ public class ProductController {
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
+        product.setImageUrl(dto.getImageUrl());
         product.setCategory(category);
 
         if (dto.getVariants() != null) {
@@ -75,6 +76,7 @@ public class ProductController {
         res.setName(product.getName());
         res.setDescription(product.getDescription());
         res.setPrice(product.getPrice());
+        res.setImageUrl(product.getImageUrl());
         res.setCreatedAt(product.getCreatedAt());
 
         CategoryDTO catDTO = new CategoryDTO();

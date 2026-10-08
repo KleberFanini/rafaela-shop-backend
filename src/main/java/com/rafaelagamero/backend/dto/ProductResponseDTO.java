@@ -11,6 +11,7 @@ public class ProductResponseDTO {
     private String name;
     private String description;
     private BigDecimal price;
+    private String imageUrl;
     private CategoryDTO category;
     private List<ProductVariantDTO> variants;
     private LocalDateTime createdAt;
