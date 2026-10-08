@@ -61,6 +61,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(saved));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar produto por ID com variações")
+    public ResponseEntity<ProductResponseDTO> getById(@PathVariable Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+        return ResponseEntity.ok(toResponseDTO(product));
+    }
+
     private ProductResponseDTO toResponseDTO(Product product) {
         ProductResponseDTO res = new ProductResponseDTO();
         res.setId(product.getId());
