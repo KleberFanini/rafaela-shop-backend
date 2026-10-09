@@ -37,6 +37,22 @@ public class OrderController {
         long pendingOrders = orderRepository.countPendingOrders();
         long activeCatalogCount = productRepository.count();
 
+        // Cálculo comparativo do mês passado em relação ao mês atual
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfCurrentMonth = now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime startOfPreviousMonth = startOfCurrentMonth.minusMonths(1);
+
+        BigDecimal currentMonthRevenue = orderRepository.calculateRevenueBetween(startOfCurrentMonth, now);
+        BigDecimal previousMonthRevenue = orderRepository.calculateRevenueBetween(startOfPreviousMonth, startOfCurrentMonth);
+
+        double growthPercentage = 0.0;
+        if (previousMonthRevenue != null && previousMonthRevenue.compareTo(BigDecimal.ZERO) > 0) {
+            double diff = currentMonthRevenue.doubleValue() - previousMonthRevenue.doubleValue();
+            growthPercentage = (diff / previousMonthRevenue.doubleValue()) * 100.0;
+        } else if (currentMonthRevenue != null && currentMonthRevenue.compareTo(BigDecimal.ZERO) > 0) {
+            growthPercentage = 100.0;
+        }
+
         List<Product> products = productRepository.findAll();
         long lowStockCount = products.stream()
                 .filter(p -> p.getVariants() != null && p.getVariants().stream().anyMatch(v -> v.getStock() != null && v.getStock() <= 3))
@@ -44,6 +60,7 @@ public class OrderController {
 
         DashboardStatsDTO stats = DashboardStatsDTO.builder()
                 .totalRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+                .revenueGrowthPercentage(Math.round(growthPercentage * 10.0) / 10.0)
                 .totalOrders(totalOrders)
                 .pendingOrders(pendingOrders)
                 .activeCatalogCount(activeCatalogCount)
