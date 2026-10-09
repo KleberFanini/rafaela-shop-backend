@@ -70,6 +70,40 @@ public class ProductController {
         return ResponseEntity.ok(toResponseDTO(product));
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar produto e suas variações por ID")
+    public ResponseEntity<ProductResponseDTO> update(@PathVariable Long id, @Valid @RequestBody ProductRequestDTO dto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com o ID: " + dto.getCategoryId()));
+
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
+            product.setImageUrl(dto.getImageUrl());
+        }
+        product.setCategory(category);
+
+        if (dto.getVariants() != null) {
+            product.getVariants().clear();
+            List<ProductVariant> newVariants = dto.getVariants().stream().map(v -> {
+                ProductVariant variant = new ProductVariant();
+                variant.setSize(v.getSize());
+                variant.setColor(v.getColor());
+                variant.setStock(v.getStock());
+                variant.setProduct(product);
+                return variant;
+            }).toList();
+            product.getVariants().addAll(newVariants);
+        }
+
+        Product updated = productRepository.save(product);
+        return ResponseEntity.ok(toResponseDTO(updated));
+    }
+
     private ProductResponseDTO toResponseDTO(Product product) {
         ProductResponseDTO res = new ProductResponseDTO();
         res.setId(product.getId());
