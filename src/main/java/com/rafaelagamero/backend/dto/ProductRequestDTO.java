@@ -33,6 +33,9 @@ public class ProductRequestDTO {
     @Schema(description = "ID da categoria associada", example = "1")
     private Long categoryId;
 
+    @Schema(description = "Gênero do produto (FEMININO, MASCULINO, UNISSEX)", example = "FEMININO")
+    private String gender = "FEMININO";
+
     @Schema(description = "Lista de variações (cores/tamanhos/estoque)")
     private List<ProductVariantDTO> variants;
 

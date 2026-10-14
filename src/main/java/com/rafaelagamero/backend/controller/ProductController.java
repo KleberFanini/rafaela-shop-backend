@@ -45,6 +45,7 @@ public class ProductController {
         product.setPrice(dto.getPrice());
         product.setImageUrl(dto.getImageUrl());
         product.setCategory(category);
+        product.setGender(dto.getGender() != null && !dto.getGender().isBlank() ? dto.getGender().toUpperCase() : "FEMININO");
 
         if (dto.getVariants() != null) {
             List<ProductVariant> variants = dto.getVariants().stream().map(v -> {
@@ -86,6 +87,9 @@ public class ProductController {
             product.setImageUrl(dto.getImageUrl());
         }
         product.setCategory(category);
+        if (dto.getGender() != null && !dto.getGender().isBlank()) {
+            product.setGender(dto.getGender().toUpperCase());
+        }
 
         if (dto.getVariants() != null) {
             product.getVariants().clear();
@@ -111,6 +115,7 @@ public class ProductController {
         res.setDescription(product.getDescription());
         res.setPrice(product.getPrice());
         res.setImageUrl(product.getImageUrl());
+        res.setGender(product.getGender() != null ? product.getGender() : "FEMININO");
         res.setCreatedAt(product.getCreatedAt());
 
         CategoryDTO catDTO = new CategoryDTO();

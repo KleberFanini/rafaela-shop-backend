@@ -13,6 +13,7 @@ public class ProductResponseDTO {
     private BigDecimal price;
     private String imageUrl;
     private CategoryDTO category;
+    private String gender;
     private List<ProductVariantDTO> variants;
     private LocalDateTime createdAt;
 }
