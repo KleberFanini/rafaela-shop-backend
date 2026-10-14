@@ -1,5 +1,7 @@
 package com.rafaelagamero.backend.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -12,23 +14,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/uploads")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UploadController {
 
+    private final Cloudinary cloudinary;
     private final Path uploadDir = Paths.get("uploads").toAbsolutePath().normalize();
 
-    public UploadController() {
+    public UploadController(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
         try {
             Files.createDirectories(uploadDir);
-        } catch (IOException e) {
-            throw new RuntimeException("Não foi possível criar o diretório de uploads", e);
+        } catch (IOException ignored) {
         }
     }
 
@@ -39,25 +39,20 @@ public class UploadController {
         }
 
         try {
-            String originalFileName = file.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "rafaela-shop",
+                            "resource_type", "auto"
+                    )
+            );
 
-            // Gera um nome único para evitar sobreposição de imagens com o mesmo nome
-            String uniqueFileName = UUID.randomUUID().toString() + extension;
-            Path targetLocation = this.uploadDir.resolve(uniqueFileName);
-
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            // Devolve o URL acessível para o frontend
-            String fileUrl = "http://localhost:8080/api/uploads/" + uniqueFileName;
-            return ResponseEntity.ok(Collections.singletonMap("url", fileUrl));
+            String secureUrl = uploadResult.get("secure_url").toString();
+            return ResponseEntity.ok(Collections.singletonMap("url", secureUrl));
 
         } catch (IOException ex) {
             return ResponseEntity.internalServerError()
-                    .body(Collections.singletonMap("error", "Falha ao gravar o ficheiro"));
+                    .body(Collections.singletonMap("error", "Falha ao enviar imagem para a nuvem: " + ex.getMessage()));
         }
     }
 
