@@ -21,6 +21,10 @@ public class CreateOrderDTO {
     @NotBlank(message = "Endereço de entrega é obrigatório")
     private String shippingAddress;
 
+    private BigDecimal shippingCost;
+
+    private String shippingMethod;
+
     @NotNull(message = "Valor total é obrigatório")
     private BigDecimal totalAmount;
 

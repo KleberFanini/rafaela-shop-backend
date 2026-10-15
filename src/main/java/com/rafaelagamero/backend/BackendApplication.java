@@ -25,6 +25,8 @@ public class BackendApplication {
 				jdbcTemplate.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT TRUE NOT NULL;");
 				jdbcTemplate.execute("UPDATE products SET active = TRUE WHERE active IS NULL;");
 				jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_code VARCHAR(50);");
+				jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_cost NUMERIC(10,2) DEFAULT 0.00;");
+				jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_method VARCHAR(100);");
 				log.info("Migrações automáticas concluídas com sucesso!");
 			} catch (Exception e) {
 				log.warn("Aviso na migração automática de banco: {}", e.getMessage());

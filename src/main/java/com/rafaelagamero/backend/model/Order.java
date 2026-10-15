@@ -41,6 +41,13 @@ public class Order {
     @Column(nullable = false)
     private String status; // PAID, PENDING, SHIPPED, DELIVERED, CANCELED
 
+    @Column(name = "shipping_cost", precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal shippingCost = BigDecimal.ZERO;
+
+    @Column(name = "shipping_method", length = 100)
+    private String shippingMethod;
+
     @Column(name = "tracking_code", length = 50)
     private String trackingCode;
 
