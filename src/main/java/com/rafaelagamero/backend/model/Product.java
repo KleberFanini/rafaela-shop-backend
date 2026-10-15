@@ -40,5 +40,22 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariant> variants;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public Boolean getActive() {
+        return active != null ? active : true;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.active == null) {
+            this.active = true;
+        }
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
 }

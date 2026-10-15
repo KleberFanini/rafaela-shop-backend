@@ -24,11 +24,20 @@ public class ProductController {
     private final CategoryRepository categoryRepository;
 
     @GetMapping
-    @Operation(summary = "Listar todos os produtos com variações")
-    public List<ProductResponseDTO> listAll(@RequestParam(required = false) Long categoryId) {
-        List<Product> products = (categoryId != null)
-                ? productRepository.findByCategoryId(categoryId)
-                : productRepository.findAll();
+    @Operation(summary = "Listar produtos com variações (ativos por padrão, ou todos incluindo inativos)")
+    public List<ProductResponseDTO> listAll(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false, defaultValue = "false") boolean includeInactive) {
+        List<Product> products;
+        if (includeInactive) {
+            products = (categoryId != null)
+                    ? productRepository.findByCategoryId(categoryId)
+                    : productRepository.findAll();
+        } else {
+            products = (categoryId != null)
+                    ? productRepository.findByCategoryIdAndActiveTrue(categoryId)
+                    : productRepository.findByActiveTrue();
+        }
 
         return products.stream().map(this::toResponseDTO).toList();
     }
@@ -46,6 +55,7 @@ public class ProductController {
         product.setImageUrl(dto.getImageUrl());
         product.setCategory(category);
         product.setGender(dto.getGender() != null && !dto.getGender().isBlank() ? dto.getGender().toUpperCase() : "FEMININO");
+        product.setActive(dto.getActive() != null ? dto.getActive() : true);
 
         if (dto.getVariants() != null) {
             List<ProductVariant> variants = dto.getVariants().stream().map(v -> {
@@ -90,6 +100,9 @@ public class ProductController {
         if (dto.getGender() != null && !dto.getGender().isBlank()) {
             product.setGender(dto.getGender().toUpperCase());
         }
+        if (dto.getActive() != null) {
+            product.setActive(dto.getActive());
+        }
 
         if (dto.getVariants() != null) {
             product.getVariants().clear();
@@ -108,6 +121,28 @@ public class ProductController {
         return ResponseEntity.ok(toResponseDTO(updated));
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Exclusão lógica de produto (desativa do catálogo da loja)")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+
+        product.setActive(false);
+        productRepository.save(product);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/toggle-active")
+    @Operation(summary = "Alternar status ativo/desativado do produto no catálogo")
+    public ResponseEntity<ProductResponseDTO> toggleActive(@PathVariable Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + id));
+
+        product.setActive(!Boolean.TRUE.equals(product.getActive()));
+        Product updated = productRepository.save(product);
+        return ResponseEntity.ok(toResponseDTO(updated));
+    }
+
     private ProductResponseDTO toResponseDTO(Product product) {
         ProductResponseDTO res = new ProductResponseDTO();
         res.setId(product.getId());
@@ -116,6 +151,7 @@ public class ProductController {
         res.setPrice(product.getPrice());
         res.setImageUrl(product.getImageUrl());
         res.setGender(product.getGender() != null ? product.getGender() : "FEMININO");
+        res.setActive(product.getActive() != null ? product.getActive() : true);
         res.setCreatedAt(product.getCreatedAt());
 
         CategoryDTO catDTO = new CategoryDTO();

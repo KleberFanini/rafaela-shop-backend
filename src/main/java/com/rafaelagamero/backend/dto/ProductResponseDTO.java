@@ -14,6 +14,7 @@ public class ProductResponseDTO {
     private String imageUrl;
     private CategoryDTO category;
     private String gender;
+    private Boolean active;
     private List<ProductVariantDTO> variants;
     private LocalDateTime createdAt;
 }

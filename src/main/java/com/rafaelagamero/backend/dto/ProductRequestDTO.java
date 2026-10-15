@@ -36,6 +36,9 @@ public class ProductRequestDTO {
     @Schema(description = "Gênero do produto (FEMININO, MASCULINO, UNISSEX)", example = "FEMININO")
     private String gender = "FEMININO";
 
+    @Schema(description = "Indica se o produto está ativo e visível na loja", example = "true")
+    private Boolean active = true;
+
     @Schema(description = "Lista de variações (cores/tamanhos/estoque)")
     private List<ProductVariantDTO> variants;
 

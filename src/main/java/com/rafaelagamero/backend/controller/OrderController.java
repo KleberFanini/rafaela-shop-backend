@@ -35,7 +35,7 @@ public class OrderController {
         BigDecimal totalRevenue = orderRepository.calculateTotalRevenue();
         long totalOrders = orderRepository.count();
         long pendingOrders = orderRepository.countPendingOrders();
-        long activeCatalogCount = productRepository.count();
+        long activeCatalogCount = productRepository.countByActiveTrue();
 
         // Cálculo comparativo do mês passado em relação ao mês atual
         LocalDateTime now = LocalDateTime.now();
@@ -99,6 +99,10 @@ public class OrderController {
         for (OrderItemRequestDTO itemDto : dto.getItems()) {
             Product product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + itemDto.getProductId()));
+
+            if (Boolean.FALSE.equals(product.getActive())) {
+                throw new RuntimeException("O produto '" + product.getName() + "' está indisponível para compra.");
+            }
 
             // Decrementa o estoque da variação se informada
             if (itemDto.getVariantId() != null) {
