@@ -22,6 +22,7 @@ public class OrderResponseDTO {
     private BigDecimal totalAmount;
     private String paymentMethod;
     private String status;
+    private String trackingCode;
     private LocalDateTime createdAt;
     private List<OrderItemResponseDTO> items;
 

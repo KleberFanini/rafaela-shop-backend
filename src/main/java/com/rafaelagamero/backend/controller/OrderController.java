@@ -149,6 +149,17 @@ public class OrderController {
         return ResponseEntity.ok(toResponseDTO(updated));
     }
 
+    @PatchMapping("/{id}/tracking")
+    @Operation(summary = "Atualizar código de rastreio dos Correios do pedido")
+    public ResponseEntity<OrderResponseDTO> updateTrackingCode(@PathVariable Long id, @RequestParam String trackingCode) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com ID: " + id));
+
+        order.setTrackingCode(trackingCode != null ? trackingCode.trim().toUpperCase() : null);
+        Order updated = orderRepository.save(order);
+        return ResponseEntity.ok(toResponseDTO(updated));
+    }
+
     private OrderResponseDTO toResponseDTO(Order order) {
         List<OrderResponseDTO.OrderItemResponseDTO> itemDTOs = order.getItems() != null ? order.getItems().stream().map(item ->
                 OrderResponseDTO.OrderItemResponseDTO.builder()
@@ -172,6 +183,7 @@ public class OrderController {
                 .totalAmount(order.getTotalAmount())
                 .paymentMethod(order.getPaymentMethod())
                 .status(order.getStatus())
+                .trackingCode(order.getTrackingCode())
                 .createdAt(order.getCreatedAt())
                 .items(itemDTOs)
                 .build();
